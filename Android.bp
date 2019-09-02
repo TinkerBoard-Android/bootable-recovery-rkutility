@@ -23,11 +23,11 @@ cc_library_static {
 
     srcs: [
         "rktools.cpp",
+        "sdboot.cpp",
     ],
 
     static_libs: [
         "libfstab",
-        "libotautil",
     ],
 
     export_include_dirs: [

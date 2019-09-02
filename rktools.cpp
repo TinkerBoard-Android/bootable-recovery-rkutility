@@ -14,7 +14,6 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <pthread.h>
-//#include "sdboot.h"
 //#include <fs_mgr.h>
 //#include "common.h"
 #include <cutils/properties.h>
@@ -29,7 +28,7 @@
 
 
 #include "rkutility/rktools.h"
-#include "otautil/roots.h"
+#include "rkutility/sdboot.h"
 
 
 
@@ -38,57 +37,7 @@
 //static int last_state = 0;
 
 using namespace std;
-# if 0
-char* check_media_package(const char *path){
-    char *reallyPath;
-    SDBoot mountDevice;
 
-    if(strncmp(path, "/mnt/external_sd", 16) == 0){
-        mountDevice.ensure_sd_mounted();
-    }else if(strncmp(path, "/mnt/usb_storage", 16) == 0){
-        mountDevice.ensure_usb_mounted();
-    }
-
-    if(strncmp(path, "/mnt/media_rw", 13) == 0){
-        printf("start to find package in /mnt/usb_storage/ .\n");
-        reallyPath = (char*)malloc(PATH_LEN);
-        mountDevice.ensure_usb_mounted();
-        memset(reallyPath, 0, PATH_LEN);
-        strcpy(reallyPath, usb_path);
-
-        const char *filename = strstr(path, "update.zip");
-        if(filename == NULL)
-            filename = strstr(path, "update.img");
-        if(filename == NULL){
-            printf("check_media_package: filename is null\n");
-            free(reallyPath);
-            reallyPath = NULL;
-            return NULL;
-        }
-
-        strcat(reallyPath, filename); 
-        if((access(reallyPath, F_OK))==0)
-        {
-            printf("check_media_package: find package ok is %s.\n", reallyPath);
-            return reallyPath;
-        }
-        
-        mountDevice.ensure_sd_mounted();
-        memset(reallyPath, 0, PATH_LEN);
-        strcpy(reallyPath, sd_path);
-        strcat(reallyPath, filename);
-        if((access(reallyPath, F_OK))==0)
-        {
-            printf("check_media_package: find package ok is %s.\n", reallyPath);
-            return reallyPath;
-        }
-        free(reallyPath);
-        reallyPath = NULL;
-    }
-
-    return NULL;
-}
-#endif
 /**
  * 从/proc/cmdline 获取串口的节点
  *
@@ -130,36 +79,6 @@ char *getSerial(){
     return ans;
 }
 
-/**
- * reset hdmi after restore factory.
-*/
-int erase_baseparameter() {
-    Volume* v = volume_for_mount_point(BASEPARAMER_PARTITION_NAME);
-    if (v == NULL) {
-        printf("unknown volume baseparamer, not erase baseparamer\n");
-        return -1;
-    }
-
-    int file;
-    file = open((v->blk_device).c_str(), O_RDWR);
-    if (file < 0){
-        printf("baseparamer file can not be opened");
-        return -1;
-    }
-    lseek(file, BASEPARAMER_PARTITION_SIZE, SEEK_SET);
-
-    //size of baseparameter.
-    char buf[BASEPARAMER_PARTITION_SIZE];
-    memset(buf, 0, BASEPARAMER_PARTITION_SIZE);
-    read(file, buf, BASEPARAMER_PARTITION_SIZE);
-
-    lseek(file, 0L, SEEK_SET);
-    write(file, (char*)(&buf), BASEPARAMER_PARTITION_SIZE);
-    close(file);
-    sync();
-
-    return 0;
-}
 
 #if 0
 void *thrd_led_func(void *arg) {
