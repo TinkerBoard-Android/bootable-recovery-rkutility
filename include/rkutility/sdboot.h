@@ -47,7 +47,9 @@ public:
 	void sdboot_set_status(int stat);
 	int sdboot_get_status(void);
 	bool sdboot_get_bSDBoot(void);
+	void sdboot_set_bSDBoot(bool is_sdboot);
 	bool sdboot_get_bUsbBoot(void);
+	void sdboot_set_bUsbBoot(bool is_usbboot);
 	void sdboot_set_bUpdateModel(bool bUpdate);
 	bool sdboot_get_bUpdateModel(void);
 	std::string sdboot_get_usb_device_path(void);

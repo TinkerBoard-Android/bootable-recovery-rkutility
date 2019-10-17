@@ -344,10 +344,22 @@ bool SDBoot::sdboot_get_bSDBoot(void){
 	return bSDBoot;
 }
 
+void SDBoot::sdboot_set_bSDBoot(bool is_sdboot){
+	printf("enter sdboot_set_bSDBoot !\n");
+	bSDBoot = is_sdboot;
+}
+
+
 bool SDBoot::sdboot_get_bUsbBoot(void){
 	printf("enter sdboot_get_bUsbBoot !\n");
 	return bUsbBoot;
 }
+
+void SDBoot::sdboot_set_bUsbBoot(bool is_usbboot){
+	printf("enter sdboot_set_bUsbBoot !\n");
+	bUsbBoot = is_usbboot;
+}
+
 
 void SDBoot::sdboot_set_bUpdateModel(bool bUpdate){
 	printf("enter sdboot_set_bUpdateModel !\n");
