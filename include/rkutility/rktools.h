@@ -58,4 +58,13 @@ void dumpCmdArgs(int argc, char** argv);
 void SplitString(const std::string& s, std::string& result, const std::string& c);
 int getEmmcState();
 bool IsSpecialName(const char *str);
+
+struct MountedVolume;
+
+bool rktools_scan_mounted_volumes();
+
+MountedVolume* rktools_find_mounted_volume_by_mount_point(const char* mount_point);
+
+int rktools_unmount_mounted_volume(MountedVolume* volume);
+
 #endif

@@ -26,6 +26,15 @@
 #include <stdint.h>
 #include <string>
 
+#include <mntent.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/mount.h>
+
+#include <string>
+#include <vector>
+
+
 
 #include "rkutility/rktools.h"
 #include "rkutility/sdboot.h"
@@ -37,6 +46,14 @@
 //static int last_state = 0;
 
 using namespace std;
+
+struct MountedVolume {
+  std::string device;
+  std::string mount_point;
+  std::string filesystem;
+  std::string flags;
+};
+
 
 /**
  * 从/proc/cmdline 获取串口的节点
@@ -287,4 +304,49 @@ bool IsSpecialName(const char *str){
         }
     }
     return false;
+}
+
+static std::vector<MountedVolume*> g_mounts_state;
+
+bool rktools_scan_mounted_volumes() {
+  for (size_t i = 0; i < g_mounts_state.size(); ++i) {
+    delete g_mounts_state[i];
+  }
+  g_mounts_state.clear();
+
+  // Open and read mount table entries.
+  FILE* fp = setmntent("/proc/mounts", "re");
+  if (fp == NULL) {
+    return false;
+  }
+  mntent* e;
+  while ((e = getmntent(fp)) != NULL) {
+    MountedVolume* v = new MountedVolume;
+    v->device = e->mnt_fsname;
+    v->mount_point = e->mnt_dir;
+    v->filesystem = e->mnt_type;
+    v->flags = e->mnt_opts;
+    g_mounts_state.push_back(v);
+  }
+  endmntent(fp);
+  return true;
+}
+
+MountedVolume* rktools_find_mounted_volume_by_mount_point(const char* mount_point) {
+  for (size_t i = 0; i < g_mounts_state.size(); ++i) {
+    if (g_mounts_state[i]->mount_point == mount_point) return g_mounts_state[i];
+  }
+  return nullptr;
+}
+
+int rktools_unmount_mounted_volume(MountedVolume* volume) {
+  // Intentionally pass the empty string to umount if the caller tries to unmount a volume they
+  // already unmounted using this function.
+  std::string mount_point = volume->mount_point;
+  volume->mount_point.clear();
+  int result = umount(mount_point.c_str());
+  if (result == -1) {
+    printf("Failed to umount mount_point=%s \n", mount_point.c_str());
+  }
+  return result;
 }
